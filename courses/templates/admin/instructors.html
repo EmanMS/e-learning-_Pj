@@ -1,0 +1,126 @@
+<!-- templates/admin/instructors.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Instructors - E-Learn{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold mb-2">
+                        <i class="fas fa-user-tie text-primary me-2"></i>
+                        Manage Instructors
+                    </h1>
+                    <p class="lead text-muted">View and manage all platform instructors</p>
+                </div>
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Instructors Table -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-0 py-3">
+            <h5 class="fw-bold mb-0">
+                <i class="fas fa-list me-2 text-primary"></i>
+                All Instructors ({{ instructors.count }})
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            {% if instructors %}
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Instructor</th>
+                            <th>Email</th>
+                            <th>Courses</th>
+                            <th>Students</th>
+                            <th>Joined</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for instructor in instructors %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if instructor.profile_picture %}
+                                    <img src="{{ instructor.profile_picture.url }}" 
+                                         class="rounded-circle me-3" 
+                                         width="45" 
+                                         height="45" 
+                                         style="object-fit: cover;">
+                                    {% else %}
+                                    <div class="bg-primary bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" 
+                                         style="width: 45px; height: 45px;">
+                                        <i class="fas fa-user-tie text-primary"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <h6 class="fw-bold mb-0">
+                                            {{ instructor.user.get_full_name|default:instructor.user.username }}
+                                        </h6>
+                                        <small class="text-muted">@{{ instructor.user.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ instructor.user.email }}</td>
+                            <td>
+                                <span class="badge bg-primary">{{ instructor.course_set.count }}</span>
+                            </td>
+                            <td>
+                                <strong>{{ instructor.total_students }}</strong>
+                            </td>
+                            <td>{{ instructor.user.date_joined|date:"M d, Y" }}</td>
+                            <td>
+                                {% if instructor.user.is_active %}
+                                <span class="badge bg-success">Active</span>
+                                {% else %}
+                                <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="{% url 'instructor_profile' instructor.id %}" 
+                                       class="btn btn-outline-primary btn-sm" 
+                                       title="View Profile">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="#" class="btn btn-outline-warning btn-sm" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="POST" action="#" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" 
+                                                class="btn btn-outline-danger btn-sm" 
+                                                title="Delete"
+                                                onclick="return confirm('Are you sure you want to delete this instructor?')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-user-tie fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No Instructors Found</h4>
+                <p class="text-muted">There are no instructors registered on the platform yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

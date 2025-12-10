@@ -1,0 +1,226 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ course.title }} - E-Learn{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Course Header -->
+    <div class="card border-0 bg-light mb-4">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-lg-8">
+                    <h1 class="fw-bold mb-3">{{ course.title }}</h1>
+                    <p class="lead text-muted mb-4">{{ course.description }}</p>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="mb-3">
+                                <strong>Instructor:</strong>
+                                {% if course.instructor %}
+                                <a href="{% url 'instructor_profile' course.instructor.id %}" class="text-decoration-none">
+                                    <span class="badge bg-primary bg-opacity-10 text-primary">
+                                        <i class="fas fa-user-tie me-1"></i>
+                                        {{ course.instructor.user.username }}
+                                    </span>
+                                </a>
+                                {% else %}
+                                <span class="text-muted">Not assigned</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-3">
+                                <strong>Price:</strong>
+                                <span class="badge {% if course.is_paid %}bg-warning text-dark{% else %}bg-success{% endif %} fs-6">
+                                    {% if course.is_paid %}
+                                    <i class="fas fa-tag me-1"></i>${{ course.price }}
+                                    {% else %}
+                                    <i class="fas fa-gift me-1"></i>FREE
+                                    {% endif %}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Enrollment Section -->
+                    <div class="enrollment-section">
+                        {% if user.is_authenticated %}
+                            {% if is_enrolled %}
+                            <div class="d-flex gap-3 align-items-center">
+                                <span class="badge bg-success fs-6 p-2">
+                                    <i class="fas fa-check-circle me-1"></i>Enrolled
+                                </span>
+                                <a href="{% url 'my_courses' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-book-open me-1"></i>My Courses
+                                </a>
+                            </div>
+                            {% else %}
+                            <a href="{% url 'enroll_course' course.id %}" class="btn btn-primary btn-lg px-4">
+                                <i class="fas fa-play-circle me-2"></i>
+                                Enroll in This Course
+                            </a>
+                            {% endif %}
+                        {% else %}
+                        <div class="alert alert-warning d-flex align-items-center">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Please <a href="{% url 'login' %}" class="alert-link mx-1">login</a> to enroll in this course
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-lg-4">
+                    {% if course.thumbnail %}
+                    <img src="{{ course.thumbnail.url }}" 
+                         alt="{{ course.title }}" 
+                         class="img-fluid rounded-3 shadow-sm">
+                    {% else %}
+                    <div class="bg-light rounded-3 d-flex align-items-center justify-content-center" 
+                         style="height: 200px;">
+                        <i class="fas fa-book-open fa-3x text-muted"></i>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    {% if user.is_authenticated and is_enrolled %}
+        <div class="card shadow-sm mb-4 mt-4">
+            <div class="card-body">
+                <h5 class="card-title">📊 Your Learning Progress</h5>
+                <div class="progress mb-2" style="height: 25px;">
+                    <div class="progress-bar {% if progress_percentage == 100 %}bg-success{% else %}bg-primary{% endif %}"
+                        role="progressbar" id="course-progress-bar" aria-valuenow="{{ progress_percentage|default:0 }}"
+                        aria-valuemin="0" aria-valuemax="100">
+                        {{ progress_percentage|default:0 }}%
+                    </div>
+                </div>
+                {% if progress_percentage == 100 %}
+                <div class="mt-2 text-success"><strong>🎓 Congratulations! You've completed this course!</strong></div>
+                {% elif progress_percentage > 0 %}
+                <div class="mt-2 text-muted"><small>💪 Keep going! You're doing amazing!</small></div>
+                {% else %}
+                <div class="mt-2 text-muted"><small>Start your learning journey! Click on lessons to mark them
+                        complete.</small></div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+   <!-- Course Lessons -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">
+                    <i class="fas fa-play-circle me-2 text-primary"></i>
+                    Course Lessons
+                </h2>
+                <span class="badge bg-primary bg-opacity-10 text-primary fs-6">
+                    {{ total_lessons }} lessons
+                </span>
+            </div>
+
+            {% for lesson in lessons %}
+            <div class="card lesson-card border-0 mb-3">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-start mb-2">
+                                <span class="badge bg-primary me-3 fs-6" style="min-width: 40px;">
+                                    {{ lesson.order }}
+                                </span>
+                                <div>
+                                    <h5 class="card-title fw-bold mb-2">{{ lesson.title }}</h5>
+                                    <p class="card-text text-muted mb-3">{{ lesson.content }}</p>
+                                    
+                                    {% if lesson.video_url %}
+                                    <a href="{{ lesson.video_url }}" 
+                                       class="btn btn-outline-primary btn-sm" 
+                                       target="_blank">
+                                        <i class="fas fa-play me-1"></i>Watch Video
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4 text-end">
+                            <div class="lesson-status">
+                                {% if lesson.id in completed_lessons %}
+                                <span class="badge bg-success fs-6 p-2">
+                                    <i class="fas fa-check-circle me-1"></i>Completed
+                                </span>
+                                {% elif is_enrolled %}
+                                <form method="POST" action="{% url 'mark_lesson_complete' lesson.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-check me-1"></i>Mark Complete
+                                    </button>
+                                </form>
+                                {% else %}
+                                <span class="text-muted">
+                                    <i class="fas fa-lock me-1"></i>Enroll to access
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="card border-0 text-center py-5">
+                <div class="card-body">
+                    <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No lessons available yet</h4>
+                    <p class="text-muted">The instructor is preparing the course content.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Back to Courses -->
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <a href="{% url 'course_list' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>
+                Back to All Courses
+            </a>
+        </div>
+    </div>
+</div>
+
+<style>
+.lesson-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+}
+
+.lesson-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.progress {
+    border-radius: 10px;
+}
+
+.progress-bar {
+    border-radius: 10px;
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

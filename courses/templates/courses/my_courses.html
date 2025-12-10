@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Courses - E-Learn{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h1 class="fw-bold mb-3">My Enrolled Courses</h1>
+            <p class="text-muted lead">Continue your learning journey</p>
+        </div>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="row mb-4">
+        <div class="col-12">
+            {% for message in messages %}
+            <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}success{% endif %} alert-dismissible fade show" role="alert">
+                <i class="fas fa-{% if message.tags == 'error' %}exclamation-circle{% else %}check-circle{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Courses Grid -->
+    <div class="row g-4">
+        {% for course in courses %}
+        <div class="col-lg-6">
+            <div class="card course-card border-0 h-100">
+                <div class="card-body p-4">
+                    <!-- Course Header -->
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-primary bg-opacity-10 text-primary">
+                            {{ course.category|default:"Development" }}
+                        </span>
+                        <div class="course-status">
+                            <span class="badge bg-success">
+                                <i class="fas fa-play-circle me-1"></i>
+                                Enrolled
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Course Title & Description -->
+                    <h4 class="fw-bold mb-3">{{ course.title }}</h4>
+                    <p class="text-muted mb-4">{{ course.description|truncatewords:20 }}</p>
+
+                    <!-- Course Stats -->
+                    <div class="course-stats mb-4">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <i class="fas fa-play-circle text-primary mb-2"></i>
+                                    <div class="fw-bold">12</div>
+                                    <small class="text-muted">Lessons</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <i class="fas fa-clock text-warning mb-2"></i>
+                                    <div class="fw-bold">8h</div>
+                                    <small class="text-muted">Duration</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="stat-item">
+                                    <i class="fas fa-star text-info mb-2"></i>
+                                    <div class="fw-bold">4.8</div>
+                                    <small class="text-muted">Rating</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course Meta -->
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Instructor</small>
+                            <strong>
+                                {% if course.instructor %}
+                                    {{ course.instructor.user.username }}
+                                {% else %}
+                                    No instructor assigned
+                                {% endif %}
+                            </strong>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Price</small>
+                            <strong class="{% if course.is_paid %}text-success{% else %}text-info{% endif %}">
+                                {% if course.is_paid %}
+                                    ${{ course.price }}
+                                {% else %}
+                                    FREE
+                                {% endif %}
+                            </strong>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'course_detail' course.id %}" class="btn btn-primary">
+                            <i class="fas fa-play-circle me-2"></i>
+                            Continue Learning
+                        </a>
+                        <a href="{% url 'course_detail' course.id %}" class="btn btn-outline-primary">
+                            <i class="fas fa-info-circle me-2"></i>
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        
+        <!-- Empty State -->
+        <div class="col-12">
+            <div class="card border-0 text-center py-5">
+                <div class="card-body">
+                    <i class="fas fa-book-open fa-3x text-muted mb-4"></i>
+                    <h3 class="fw-bold mb-3">No Courses Yet</h3>
+                    <p class="text-muted mb-4">You haven't enrolled in any courses yet. Start your learning journey today!</p>
+                    <a href="{% url 'course_list' %}" class="btn btn-primary btn-lg px-4">
+                        <i class="fas fa-search me-2"></i>
+                        Browse Courses
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Back to Courses -->
+    {% if courses %}
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <a href="{% url 'course_list' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-2"></i>
+                Browse More Courses
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.course-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stat-item {
+    padding: 10px;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.stat-item i {
+    font-size: 1.2rem;
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

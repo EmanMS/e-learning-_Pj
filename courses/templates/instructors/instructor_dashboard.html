@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Instructor Dashboard - E-Learn{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Welcome Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="fw-bold mb-2">
+                        <i class="fas fa-tachometer-alt me-2 text-primary"></i>
+                        Instructor Dashboard
+                    </h1>
+                    <p class="lead text-muted">Welcome back, {{ instructor.user.username }}! Manage your courses and track your impact.</p>
+                </div>
+                <a href="{% url 'create_course' %}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>Create New Course
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-5">
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 bg-primary text-white">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-book-open fa-2x mb-3"></i>
+                    <h3 class="fw-bold">{{ total_courses }}</h3>
+                    <p class="mb-0">Total Courses</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 bg-success text-white">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-users fa-2x mb-3"></i>
+                    <h3 class="fw-bold">{{ total_students }}</h3>
+                    <p class="mb-0">Total Students</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 bg-warning text-dark">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-play-circle fa-2x mb-3"></i>
+                    <h3 class="fw-bold">{{ total_lessons }}</h3>
+                    <p class="mb-0">Total Lessons</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-4">
+            <div class="card border-0 bg-info text-white">
+                <div class="card-body text-center p-4">
+                    <i class="fas fa-star fa-2x mb-3"></i>
+                    <h3 class="fw-bold">4.8</h3>
+                    <p class="mb-0">Average Rating</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Courses Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">
+                    <i class="fas fa-book me-2 text-primary"></i>
+                    My Courses
+                </h2>
+                <a href="{% url 'create_course' %}" class="btn btn-outline-primary">
+                    <i class="fas fa-plus me-2"></i>Add Course
+                </a>
+            </div>
+
+            {% if courses %}
+            <div class="row g-4">
+                {% for course in courses %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card course-card border-0 h-100">
+                        {% if course.thumbnail %}
+                        <img src="{{ course.thumbnail.url }}" class="card-img-top course-image" alt="{{ course.title }}">
+                        {% else %}
+                        <div class="card-img-top course-image bg-light d-flex align-items-center justify-content-center">
+                            <i class="fas fa-book-open fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary bg-opacity-10 text-primary small">
+                                    {{ course.category|default:"Development" }}
+                                </span>
+                                <span class="badge {% if course.is_paid %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                    {% if course.is_paid %}
+                                    ${{ course.price }}
+                                    {% else %}
+                                    FREE
+                                    {% endif %}
+                                </span>
+                            </div>
+                            
+                            <h5 class="card-title fw-bold mb-2">{{ course.title }}</h5>
+                            <p class="card-text text-muted small mb-3">{{ course.description|truncatewords:10 }}</p>
+                            
+                            <div class="course-stats mb-3">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Students</small>
+                                        <strong>{{ course.enrolled_students.count }}</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Lessons</small>
+                                        <strong>{{ course.lesson_set.count }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'edit_course' course.id %}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-edit me-1"></i>Manage Course
+                                </a>
+                                <a href="{% url 'course_detail' course.id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>View Course
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="card border-0 text-center py-5">
+                <div class="card-body">
+                    <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                    <h3 class="fw-bold mb-3">No Courses Yet</h3>
+                    <p class="text-muted mb-4">Start creating your first course and share your knowledge with students!</p>
+                    <a href="{% url 'create_course' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Create Your First Course
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    {% if courses %}
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card border-0 bg-light">
+                <div class="card-body p-4">
+                    <h4 class="fw-bold mb-4">
+                        <i class="fas fa-bolt me-2 text-primary"></i>
+                        Quick Actions
+                    </h4>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{% url 'create_course' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-plus me-2"></i>New Course
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'instructor_profile' instructor.id %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-user-tie me-2"></i>My Profile
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="#" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-chart-bar me-2"></i>Analytics
+                            </a>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.course-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.course-image {
+    height: 160px;
+    object-fit: cover;
+}
+
+.card {
+    border-radius: 12px;
+}
+
+.btn {
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %}

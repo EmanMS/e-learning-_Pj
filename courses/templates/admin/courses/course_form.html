@@ -1,0 +1,190 @@
+<!-- templates/admin/courses/course_form.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% if form.instance.id %}Edit Course{% else %}Create New Course{% endif %} - E-Learn{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="fw-bold mb-2">
+                                <i class="fas fa-{% if form.instance.id %}edit{% else %}plus{% endif %} text-warning me-2"></i>
+                                {% if form.instance.id %}Edit Course{% else %}Create New Course{% endif %}
+                            </h1>
+                            <p class="lead text-muted">
+                                {% if form.instance.id %}
+                                Update course information and settings
+                                {% else %}
+                                Add a new course to the platform
+                                {% endif %}
+                            </p>
+                        </div>
+                        <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Course Form -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>Please correct the errors below:</strong>
+                            <ul class="mb-0 mt-2">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <!-- Course Title -->
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label fw-semibold">
+                                    Course Title *
+                                </label>
+                                {{ form.title }}
+                                {% if form.title.help_text %}
+                                <div class="form-text">{{ form.title.help_text }}</div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Description -->
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
+                                    Description *
+                                </label>
+                                {{ form.description }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.category.id_for_label }}" class="form-label fw-semibold">
+                                    Category
+                                </label>
+                                {{ form.category }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.instructor.id_for_label }}" class="form-label fw-semibold">
+                                    Instructor
+                                </label>
+                                {{ form.instructor }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.price.id_for_label }}" class="form-label fw-semibold">
+                                    Price ($)
+                                </label>
+                                {{ form.price }}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.duration.id_for_label }}" class="form-label fw-semibold">
+                                    Duration (hours)
+                                </label>
+                                {{ form.duration }}
+                            </div>
+
+                            <!-- Thumbnail -->
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.thumbnail.id_for_label }}" class="form-label fw-semibold">
+                                    Course Thumbnail
+                                </label>
+                                {{ form.thumbnail }}
+                                {% if form.instance.thumbnail %}
+                                <div class="mt-2">
+                                    <small class="text-muted">Current thumbnail:</small>
+                                    <img src="{{ form.instance.thumbnail.url }}" alt="Current thumbnail" class="img-thumbnail ms-2" width="100">
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Checkboxes -->
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-check form-switch">
+                                            {{ form.is_paid }}
+                                            <label class="form-check-label fw-semibold" for="{{ form.is_paid.id_for_label }}">
+                                                Paid Course
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-check form-switch">
+                                            {{ form.is_active }}
+                                            <label class="form-check-label fw-semibold" for="{{ form.is_active.id_for_label }}">
+                                                Active Course
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <div class="form-check form-switch">
+                                            {{ form.is_featured }}
+                                            <label class="form-check-label fw-semibold" for="{{ form.is_featured.id_for_label }}">
+                                                Featured Course
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">
+                                        Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="fas fa-save me-2"></i>
+                                        {% if form.instance.id %}Update Course{% else %}Create Course{% endif %}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-control, .form-select {
+    border-radius: 8px;
+    padding: 10px 15px;
+    border: 1px solid #dee2e6;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.form-check-input:checked {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+.form-label {
+    color: #495057;
+    margin-bottom: 8px;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ instructor.user.username }} - Instructor Profile{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Instructor Header -->
+    <div class="row mb-5">
+        <div class="col-md-4 text-center">
+            <div class="instructor-avatar mb-4">
+                {% if instructor.profile_picture %}
+                    <img src="{{ instructor.profile_picture.url }}" 
+                         alt="{{ instructor.user.username }}" 
+                         class="rounded-circle img-fluid" 
+                         style="width: 200px; height: 200px; object-fit: cover;">
+                {% else %}
+                    <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mx-auto" 
+                         style="width: 200px; height: 200px;">
+                        <i class="fas fa-user-tie fa-4x text-white"></i>
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if instructor.user == user %}
+            <a href="{% url 'instructor_dashboard' %}" class="btn btn-primary btn-lg w-100 mb-3">
+                <i class="fas fa-tachometer-alt me-2"></i>
+                Instructor Dashboard
+            </a>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-8">
+            <div class="d-flex justify-content-between align-items-start mb-3">
+                <div>
+                    <h1 class="fw-bold mb-2">{{ instructor.user.get_full_name|default:instructor.user.username }}</h1>
+                    <p class="lead text-muted mb-3">{{ instructor.specialization }}</p>
+                </div>
+                <span class="badge bg-warning text-dark fs-6 p-2">
+                    <i class="fas fa-star me-1"></i>
+                    Instructor
+                </span>
+            </div>
+            
+            <p class="mb-4">{{ instructor.bio }}</p>
+            
+            <div class="row text-center mb-4">
+                <div class="col-4">
+                    <div class="stat-number">{{ instructor.total_courses }}</div>
+                    <p class="text-muted mb-0">Courses</p>
+                </div>
+                <div class="col-4">
+                    <div class="stat-number">{{ instructor.total_students }}</div>
+                    <p class="text-muted mb-0">Students</p>
+                </div>
+                <div class="col-4">
+                    <div class="stat-number">4.8</div>
+                    <p class="text-muted mb-0">Rating</p>
+                </div>
+            </div>
+            
+            {% if instructor.website or instructor.linkedin %}
+            <div class="social-links">
+                <h5 class="mb-3">Connect</h5>
+                {% if instructor.website %}
+                <a href="{{ instructor.website }}" class="btn btn-outline-primary me-2" target="_blank">
+                    <i class="fas fa-globe me-1"></i>Website
+                </a>
+                {% endif %}
+                {% if instructor.linkedin %}
+                <a href="{{ instructor.linkedin }}" class="btn btn-outline-primary" target="_blank">
+                    <i class="fab fa-linkedin me-1"></i>LinkedIn
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Instructor's Courses -->
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold">My Courses</h2>
+                {% if instructor.user == user %}
+                <a href="{% url 'create_course' %}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create New Course
+                </a>
+                {% endif %}
+            </div>
+            
+            <div class="row g-4">
+                {% for course in instructor.course_set.all %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card course-card border-0 h-100">
+                        {% if course.thumbnail %}
+                        <img src="{{ course.thumbnail.url }}" class="card-img-top course-image" alt="{{ course.title }}">
+                        {% else %}
+                        <div class="card-img-top course-image bg-light d-flex align-items-center justify-content-center">
+                            <i class="fas fa-book-open fa-3x text-muted"></i>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-primary bg-opacity-10 text-primary small">
+                                    {{ course.category }}
+                                </span>
+                                <span class="badge {% if course.is_paid %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                    {% if course.is_paid %}
+                                    ${{ course.price }}
+                                    {% else %}
+                                    FREE
+                                    {% endif %}
+                                </span>
+                            </div>
+                            
+                            <h5 class="card-title fw-bold mb-2">{{ course.title }}</h5>
+                            <p class="card-text text-muted small mb-3">{{ course.description|truncatewords:15 }}</p>
+                            
+                            <div class="course-stats">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Students</small>
+                                        <strong>{{ course.total_enrollments }}</strong>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Lessons</small>
+                                        <strong>{{ course.total_lessons }}</strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                {% if instructor.user == user %}
+                                <a href="{% url 'edit_course' course.id %}" class="btn btn-outline-primary btn-sm w-100">
+                                    <i class="fas fa-edit me-1"></i>Manage Course
+                                </a>
+                                {% else %}
+                                <a href="{% url 'course_detail' course.id %}" class="btn btn-primary btn-sm w-100">
+                                    <i class="fas fa-eye me-1"></i>View Course
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                    <h4 class="text-muted">No courses yet</h4>
+                    {% if instructor.user == user %}
+                    <p class="text-muted">Create your first course and start teaching!</p>
+                    <a href="{% url 'create_course' %}" class="btn btn-primary">Create Your First Course</a>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.instructor-avatar {
+    border: 5px solid #f8f9fa;
+    border-radius: 50%;
+    padding: 10px;
+    background: white;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 800;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    line-height: 1;
+}
+
+.course-card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.course-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.course-image {
+    height: 160px;
+    object-fit: cover;
+}
+</style>
+{% endblock %}
