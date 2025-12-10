@@ -4,7 +4,6 @@ A comprehensive Django-based e-learning platform that enables instructors to cre
 
 ![Django](https://img.shields.io/badge/Django-5.2.8-green.svg)
 ![Python](https://img.shields.io/badge/Python-3.x-blue.svg)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 ## 📋 Table of Contents
 
@@ -442,3 +441,4 @@ For support, please open an issue in the repository or contact the development t
 ---
 
 **Note**: This platform is under active development. Features and documentation may change.
+
